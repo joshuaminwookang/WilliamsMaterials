@@ -1,4 +1,6 @@
-# Welcome to Mateirals Phyiscs Lab @ Williams College Physics
+# Materials Phyiscs Lab @ Williams College Physics
+
+Welcome!
 
 This repository serves the purpose of storing and maintianing MATLAB code for research at Williams College Materials Physics Lab (Prof. Jensen). 
 
