@@ -8,6 +8,7 @@
 %
 % Joshua Kang & Abdullah Nasir
 % 2018. 11. 21
+
 function bg = collapse_pixels(image, center, zero_surface_to_subtract, rz)
 clear bg x y max_rad s
 
@@ -29,7 +30,7 @@ for k = 1: length(image(1,1,:))
             if rad > 0
                 sum = collapse(rad, k).avg * collapse(rad,k).count + image(i,j,k);
                 collapse(rad, k).count = collapse(rad,k).count +1;
-                collapse(rad, k).avg = sum/collapse(rad, k).count;
+                collapse(rad, k).avg = sum / collapse(rad, k).count;
             end
         end
     end

@@ -21,7 +21,7 @@
 
 %% user-defined parameters 
 
-% Change fileprefix!
+% Need to change fileprefix!
 
 %%%%%%%%%%%
 % addpath /Users/jmk/Documents/Res_JensenLab/180703_Confocal_G81/180703_G81_Locating
@@ -92,8 +92,8 @@ hold all
 %make the plot that looks nice:
 set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
 axis equal
-xlabel('r (µm) ')
-ylabel('z (µm) ')
+xlabel('r (ï¿½m) ')
+ylabel('z (ï¿½m) ')
 savefig([fileprefix '_collapsed_figure.fig'])
 
 %% (5) collapse background fluorescence and plot
@@ -108,7 +108,7 @@ plot(rz(:,1),rz(:,2),'.','DisplayName',['profile ' fileprefix])
 set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
 %axis equal
 axis ([0, 100, -15,5])
-xlabel('r (µm) ')
-ylabel('z (µm) ')
+xlabel('r (ï¿½m) ')
+ylabel('z (ï¿½m) ')
 savefig([fileprefix '_bg_figure.fig'])
 
