@@ -10,6 +10,7 @@
 % 2018. 11. 21
 
 function bg = collapse_pixels(image, center, zero_surface_to_subtract, rz)
+
 clear bg x y max_rad s
 
 %find center in pixels 
@@ -19,7 +20,7 @@ y = round(center(2)/0.14);
 %find max distance
 max_rad = max([x+y, (1024-x)+y, (1024-y)+x, (1024-x)+(1024-y)]);
 
-%intialize collapse, a 2D matrxi of r,z 
+%intialize collapse, a 2D matrix of r,z 
 collapse(1:max_rad, 1:length(image(1,1,:))) = struct('avg',0,'count',0);
 
 %for each z, iteratively compute average intensity based on input image
