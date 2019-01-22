@@ -2,7 +2,7 @@
 
 Welcome!
 
-This repository serves the purpose of storing and maintianing MATLAB code for research at Williams College Materials Physics Lab (Prof. Jensen). 
+This repository is a place for storing and maintianing MATLAB code for research at the Williams College Materials Physics Lab (Prof. Jensen). 
 
 Visit the lab website at: 
 https://sites.williams.edu/materials/
