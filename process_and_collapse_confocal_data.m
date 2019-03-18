@@ -92,12 +92,12 @@ hold all
 %make the plot that looks nice:
 set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
 axis equal
-xlabel('r (�m) ')
-ylabel('z (�m) ')
+xlabel('r (\mu m) ')
+ylabel('z (\mu m) ')
 savefig([fileprefix '_collapsed_figure.fig'])
 
 %% (5) collapse background fluorescence and plot
-%bg = collapse_pixels(raw_residuals, center, zero_surface_to_subtract, rz;
+bg = collapse_pixels(raw_residuals, center, zero_surface_to_subtract, rz);
 %create plot
 figure('Name',fileprefix)
 plot(bg(:,1),bg(:,2),'.','DisplayName',['profile ' fileprefix])
@@ -108,7 +108,7 @@ plot(rz(:,1),rz(:,2),'.','DisplayName',['profile ' fileprefix])
 set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
 %axis equal
 axis ([0, 100, -15,5])
-xlabel('r (�m) ')
-ylabel('z (�m) ')
+xlabel('r (\mu m) ')
+ylabel('z (\mu m) ')
 savefig([fileprefix '_bg_figure.fig'])
 
