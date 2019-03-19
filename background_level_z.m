@@ -2,10 +2,10 @@
 % Given a 3D flourescent-dyed image, this function levels the background pixel 
 % intensities in the z-direction
 % PRE: 1024 x 1024 x (___) image (most likely, raw_residual) and a poly22 fit of the surface  
-% POST: returns the rz-collapse of the pixel intesities
+% POST: returns z-leveled 3D image
 %
 
-function leveledImage = background_level_z(image, scale, plane_fit)
+function [leveledImage, z_zero] = background_level_z(image, scale, plane_fit)
 
 clear leveledImage X Y zShifts;
 
@@ -13,20 +13,22 @@ clear leveledImage X Y zShifts;
 % once z_shift is found, rescale by z' = z - z_shift
 % POST: 3D matrix (image) leveled in the z-direction based on the plane_fit found from particles.
 
-leveledImage = zeros(size(image)); % intialize matrix to be returned
 
 % pixel locations scaled to be actual distance (in um)
 [X,Y] = meshgrid((1:size(image, 1))*scale(1), (1:size(image, 2))*scale(2));
 
-% size of z_shifts for (x,y) coordinate 
+% size of z_shifts for (x,y) coordinates 
 zShifts = round((plane_fit.p00*ones(size(image,1)) + plane_fit.p10*X + plane_fit.p01*Y...
      + plane_fit.p11*(X.*Y) + plane_fit.p20*(X.*X) + plane_fit.p02*(Y.*Y))/scale(3));
+
+z_zero = max(max(zShifts)); % find maximum z shift 
+leveledImage = zeros(size(image,1), size(image,2), size(image,3)+2*z_zero); % intialize matrix to be returned
 
 % fill up matrix to return with z-shifted values from original 3D image
 for i = 1:size(image,1)
     for j = 1:size(image,2)
-        for k = 1:(size(image,3)-zShifts(i,j))
-            leveledImage(i,j,k) = image(i,j,k+zShifts(i,j));
-        end
+        zStack = image(i,j,:);
+        leveledImage(i,j,zShifts(i,j) + (1:size(image,3))) = zStack;
     end
 end
+
