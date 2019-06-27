@@ -10,7 +10,6 @@ pixCenter = center./scale(1,2) ;   % convert the center of circle to pixel coord
 
 % the maximum radius that we will be looking at
 rMax = floor(max([1024-pixCenter(1), 1024-pixCenter(2), pixCenter(1), pixCenter(2)]));
-
 rz = zeros(rMax*size(someImage,3),3); % array to return 
 
 % number of samples to take for each radius 
@@ -29,12 +28,18 @@ R = repmat(reshape((1:rMax),[1,1,rMax]),size(D,1),size(D,2));
 row = floor(pixCenter(1) + R.*cos(D));
 col = floor(pixCenter(2) + R.*sin(D));
 
+% experimental code: try creating concentric circles with radii 1,2,3, ...
+[radius, theta] = meshgrid(1:1:rMax, linspace(0,2*pi,100));
+circlesX = pixCenter(1) + radius.*cos(theta);
+circlesY = pixCenter(2) + radius.*sin(theta);
+
+
 intensity = zeros(size(row,1)*size(row,2),1); %intialize pixel intensities array
 counts = 1;
 for z = 1:size(someImage,3)
     zSlice  = someImage(:,:,z);
     % find appropriate limit for circle radii
-    for r = 1 : rMax; 
+    for r = 1:rMax
         % fancy code to create a 2 x __ array of (i,j) coordinates of pixels to sample from;
         samplingPos = cat(3, row(:,:,r), col(:,:,r));
         samplingPos = permute(samplingPos, [2,3,1]);
@@ -49,38 +54,10 @@ for z = 1:size(someImage,3)
             end
         end
         avg = sum(intensity )/length(intensity);
-        if (avg >= 50)
-            rz(counts,:) = [r*scale(1), (z-2*z_zero)*scale(3), avg]; 
+        if (avg >= 220)
+            rz(counts,:) = [r*scale(1), (z-z_zero)*scale(3), avg]; 
             % record average intensity along with r,z values
             counts = counts+1;
         end
     end
 end
-
-
-%{
-for Z = 1:size(someImage,3) 
-    % find appropriate limit for circle radii
-    rmax = min([1024-center(1), 1024-center(2), center(1), center(2)])-1;
-    for R = 1 : rMax; 
-        % find how many pixels the circle crosses; these values for only 0 ~ 45 deg 
-        sampleNum = floor(R/sqrt(2))+1;
-        sampleAngles = (1:sampleNum)*(pi/4)/sampleNum;
-
-        intensities = []; % array of intensiteis of pixels that the circle crosses
-        % fill out intensity array for pixels where the circle of radius R crosses
-        for a = 1 : length(angles)
-            for s = 1 : length(sampleAngles)
-                row = floor(center(1) + R*cos(angles(a)+sampleAngles(s)));
-                col = floor(center(2) + R*sin(angles(a)+sampleAngles(s)));
-                try 
-                    intensities(8*a+s) = someImage(row,col,Z + z_shift(row,col));
-                catch   
-                    intensities(8*a+s) = 0;
-                end
-            end
-        end
-        rz = [rz;[R*scale(1),Z*scale(3), sum(intensities)/length(intensities)]];
-    end
-end
-%}

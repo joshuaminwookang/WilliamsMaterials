@@ -28,7 +28,7 @@ leveledImage = zeros(size(image,1), size(image,2), size(image,3)+2*z_zero); % in
 for i = 1:size(image,1)
     for j = 1:size(image,2)
         zStack = image(i,j,:);
-        leveledImage(i,j,zShifts(i,j) + (1:size(image,3))) = zStack;
+        leveledImage(i,j,z_zero - zShifts(i,j) + (1:size(image,3))) = zStack;
     end
 end
 

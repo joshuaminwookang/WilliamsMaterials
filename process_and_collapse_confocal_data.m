@@ -33,8 +33,8 @@ fileprefix = 'test';
 
 
 %% (1) pixel-to-micrometer conversion
-%r = r_um;
-r = importdata('test_xyz_coordinates.txt');
+r = r_um;
+%r = importdata('newTest.txt');
 %(note that this overwrites r in the workspace)
 
 %% (2) zeroing / leveling...
@@ -97,7 +97,8 @@ ylabel('z (\mu m) ')
 savefig([fileprefix '_collapsed_figure.fig'])
 
 %% (5) collapse background fluorescence and plot
-bg = collapse_pixels(raw_residuals, center, zero_surface_to_subtract, rz);
+%[leveled,zero] = background_level_z(raw, scale, undeformed_plane_fit);
+bg = background_rz_collapse(leveled, scale, center, zero);
 %create plot
 figure('Name',fileprefix)
 plot(bg(:,1),bg(:,2),'.','DisplayName',['profile ' fileprefix])
@@ -107,8 +108,21 @@ plot(rz(:,1),rz(:,2),'.','DisplayName',['profile ' fileprefix])
 %make the plot that looks nice:
 set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
 %axis equal
-axis ([0, 100, -15,5])
+axis ([0, 60, -15,5])
 xlabel('r (\mu m) ')
 ylabel('z (\mu m) ')
 savefig([fileprefix '_bg_figure.fig'])
 
+
+%% visualize-side view
+
+for i=290:1024;
+    imagesc(permute(leveled(i,:,:)>220,[3 2 1])); 
+    hold all; 
+    plot(rz(:,1)/0.14 + 330, rz(:,2)/0.225 + 61,'r.');
+    hold off; 
+    axis image; 
+    axis xy; 
+    title(i); 
+    input(''); 
+end

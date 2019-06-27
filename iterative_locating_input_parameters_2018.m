@@ -39,8 +39,8 @@
 %% Ensure that the locating software is on the current Matlab path structure:
 % these paths should be edited to reflect the correct paths on your computer 
 
-addpath ~/Documents/MATLAB/
-addpath '~/Documents/MATLAB/Kilfoil_locating_3D_feature_finding_algorithms/'
+%addpath ~/Documents/MATLAB/
+%addpath '~/Documents/MATLAB/Kilfoil_locating_3D_feature_finding_algorithms/'
 
 
 
@@ -65,7 +65,7 @@ range = [1 1e5]; %to load in all available image slices, set range(2) to a large
 % (this can be done a few ways; examples are below)
 
 %manually define the file name:
-image_filename = 'test.tif';
+image_filename = 'newTest.tif';
 
 %or, uncomment the following to assemble the file name automatically:
 %(this is useful, for example, when this script will be called
@@ -117,14 +117,14 @@ lnoise = [2 2 4];
 lobject = [15 15 30];
 
 %numbers somewhat larger than the largest particle diameter:
-diameters = [16 16 23];
+diameters = [16 16 32];
 %numbers somewhat smaller than the smallest particle diameter:
 mask_size = [7 7 15];
 
 %a minimum separation cutoff to help prevent doubly-located particles 
 %(set conservatively; this is to avoid a single particle being detected
 %twice in any given particle locating iteration)
-min_separation = [4 4 6];
+min_separation = [5 5 10];
 
 % masscut parameters, determined by looking at the histogram of "masses"
 % (i.e. the integrated intensity of the found particles); in the Gao &

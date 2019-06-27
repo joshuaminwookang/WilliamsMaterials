@@ -19,7 +19,7 @@ y = round(center(2)/0.14);
 
 %find max distance
 max_rad = max([x+y, (1024-x)+y, (1024-y)+x, (1024-x)+(1024-y)]);
-
+n
 %intialize collapse, a 2D matrix of r,z 
 collapse(1:max_rad, 1:length(image(1,1,:))) = struct('avg',0,'count',0);
 
@@ -54,3 +54,4 @@ bg = [0.14/1.4 0.225].* bg;
 
 %save data
 %
+BB
