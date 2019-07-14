@@ -189,6 +189,9 @@ end
 center_stack = zeros(1,2,image_count);
 rz_stack = zeros(1,2,image_count);
 
+disp(['[Success] completed locating fluorescent beads.' newline])
+
+
 %% Step 2. Level and Collapse Flourescent Beads & Flourescent Background PDMS Data 
 % @dependencies: select_region.m, fit_poly22_to_points.m
 % @params: r_um
@@ -267,7 +270,7 @@ for counter = 1:image_count
     bckgd_rz_stack(:,:,counter) = bg; % save the leveled & rz-collapsed bckgd data
     
     % create plot for comparison/overlay
-    figure('Name', ['Complete rz collapse for ' module_name '_sphere' num2str(counter)])
+    figure('Name', ['Full rz collapse for ' module_name '_sphere' num2str(counter)])
     plot(bg(:,1),bg(:,2),'.','DisplayName',['profile ' module_name '_beads_sphere' num2str(counter)])
     hold all
     plot(rz(:,1),rz(:,2),'.','DisplayName',['profile ' module_name '_bckgd_sphere' num2str(counter)])
@@ -292,6 +295,8 @@ for counter = 1:image_count
         input(''); 
     end
 end
+
+disp(['[Success] complated rz collapsing confocal data.' newline])
 
 %% Step 3. Circle fit the collapsed bead coordinates to find sphere Radius and (indentation) depth
 % @dependencies: cicle_fit.m, circle_fit_error.m
@@ -356,6 +361,9 @@ for counter = 1:image_count
     % change variable name !!!
     save([module_name '_beads_Rd.mat'], beads_Rd_stack);
 end
+
+disp(['[Success] completed circle fitting bead data' newline])
+
 
 %% Step 4. Calculate fluid phase volume
 disp(newline)
