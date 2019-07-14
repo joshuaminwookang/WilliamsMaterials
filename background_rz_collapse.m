@@ -1,5 +1,5 @@
 
-% Given a z-leveled 3D pixel image, r-z collapse 
+% R-z collapses a given a z-leveled 3D pixel image.
 % PRE: 1024 x 1024 x (___) image (most likely leveledImage) and the center of the image
 % POST: returns the rz-collapse of the pixel intesities
 %
@@ -44,6 +44,7 @@ for z = 1:size(someImage,3)
         samplingPos = cat(3, row(:,:,r), col(:,:,r));
         samplingPos = permute(samplingPos, [2,3,1]);
         samplingPos = reshape(samplingPos, [size(samplingPos,1)*size(samplingPos,3), size(samplingPos,2)]);
+        
         %for each row in our indexing array, record the pixel intensity 
         for l = 1:size(samplingPos,1)
             i = samplingPos(l,1); j = samplingPos(l,2);

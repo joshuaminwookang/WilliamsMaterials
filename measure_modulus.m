@@ -43,4 +43,3 @@ end
     Estar_avg = Estar_sum/(N/3)
 
 save(['Bulk_stiffness_' type '.mat'], 'stiffness');
-
