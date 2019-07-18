@@ -11,15 +11,14 @@
 %% Step 0. Set Variables and Constants
 
 disp('------------------------------------------------------------------')
-disp('             Welcome to AIPS analysis v.1.0  ')
+disp('               Welcome to AIPS analysis v.1.0  ')
 disp('------------------------------------------------------------------')
-disp([newline 'Getting started ...' ])
-
+disp([newline 'Getting started ...'])
+disp(['IMPORTANT: keep the cursor in the Command Window while this code is running!' newline])
 % 0-1) INTERACTIVE settings update
 
 % Ask user for module name 
 module_name = input([newline 'Set current module name: ' ],'s');
-file_type = '.tif'; %default setting
 
 % Should we run interactively?
 run_interactively = input([newline 'Run interactively? (y/n) :'],'s');
@@ -30,7 +29,7 @@ run_interactively = input([newline 'Run interactively? (y/n) :'],'s');
     end
     
 % Ask for scale of confocal image data 
-disp([newline 'What were the xyz scales (in �m) of your images? (Enter in the format [ __ , __ , __ ])']);
+disp([newline 'What were the xyz scales (in \mu m) of your images? (Enter for example, [0.1,0.1,0.225])']);
 scale = input([': ']);
 
 % Ask for image location
@@ -55,8 +54,8 @@ code_folder = pwd;
 cd(image_folder);
 addpath(image_folder);
 
-image_beads_list = strsplit(ls('*.tif'));
-image_bckgd_list = strsplit(ls('*.tif'));
+image_beads_list = strsplit(ls('*_FITC.tif'));
+image_bckgd_list = strsplit(ls('*_Cy5.tif'));
 image_beads_list(end) = []; 
 image_bckgd_list(end) = [];
 image_beads_list = sort(image_beads_list);
@@ -93,6 +92,7 @@ masscut_residuals = 1e5; % required nonzero to prevent residual noise from being
 % Arrays of data to be saved and will be used throughout this analysis
 r_um_stack = [];
 r_zeroed_stack = [];
+rz_stack = [];
 beads_Rd_stack = [];
 bckgd_rz_stack = [];
 
@@ -164,7 +164,7 @@ for counter = 1:image_count
 
     % during manual parameter-refining, at the end of this step, use show_slice to overlay the particle coordinates on the original images to check the locating.
     %save r_firstpass.mat 
-    disp(['Initial particle locating complete at ' datestr(now,'HH:MM:ss') ' on ' datestr(now, 'mm-DD-YYYY') '. Moving on to find any missed particles by running particle locating iteratively on the image residuals.'])
+    disp(['Initial particle locating complete at ' datestr(now,'HH:MM:ss') ' on ' datestr(now, 'mm-DD-YYYY') '.'])
 
     % 1-5) Save the particle locations
 
@@ -177,37 +177,38 @@ for counter = 1:image_count
     % convert xyz coordinates accordingly and save them in a txt file
     r3 = r(:,1:3);
     r_um = scale .* r3;
+    figure('Name', [module_name ': particle locating for sphere #' num2str(counter)])
     scatter3(r_um(:,1),r_um(:,2),r_um(:,3),20,r_um(:,3),'filled')
     axis equal
-    
+        
     % save r_um
     r_um_stack(:,:,counter) = r_um;
-    dlmwrite([module_name '_bead_sphere' num2str(counter) '_xyz_coordinates.txt'], r_um, '\t');
+    dlmwrite([module_name '_beads_sphere' num2str(counter) '_xyz_coordinates.txt'], r_um, '\t');
 end
 
 % Setup stacks to save data that have dimensions dependent on 'image_count'
 center_stack = zeros(1,2,image_count);
-rz_stack = zeros(1,2,image_count);
 
 disp(['[Success] completed locating fluorescent beads.' newline])
 
 
 %% Step 2. Level and Collapse Flourescent Beads & Flourescent Background PDMS Data 
 % @dependencies: select_region.m, fit_poly22_to_points.m
-% @params: r_um
-% @returns: select_vector, undeformed_plane_fit,zero_surface_to_subtract, r_zeroed
+% @params: r_um, bckgd_image
+% @returns: select_vector, undeformed_plane_fit,zero_surface_to_subtract,r_zeroed
 % @writes: ..._r_zeroed.txt
 
 disp(newline)
 disp('------------------------------------------------------------------')
-disp('         Step 2: level and rz-collapse data')
+disp('              Step 2: level and rz-collapse data')
 disp('------------------------------------------------------------------')
     
 for counter = 1:image_count
     current_filename = image_beads_list{counter};
     r_um = r_um_stack(:,:,counter);
+    bckgd_image = image_bckgd_list{counter};
     
-    disp(['Leveling and collapsing bead data for: ' current_filename newline])
+    disp([newline 'Leveling and collapsing bead data for: ' current_filename newline])
     
     % 2-1) zeroing / leveling...
     % zero/level the data by fitting a plane to the OUTER points, far from the
@@ -226,9 +227,9 @@ for counter = 1:image_count
     dist_from_edge = 10; %CONST
 
     %for a symmetric box:     
-    %select_vector = ~select_region(r,'box',[dist_from_edge dist_from_edge -inf],[max(r(:,1))-dist_from_edge max(r(:,2))-dist_from_edge inf]);
+    select_vector = ~select_region(r,'box',[dist_from_edge dist_from_edge -inf],[max(r(:,1))-dist_from_edge max(r(:,2))-dist_from_edge inf]);
     %for only the right and bottom edges:
-    select_vector = select_region(r_um,'box',[0 0 -inf],[max(r_um(:,1))-dist_from_edge max(r_um(:,2))-dist_from_edge inf]);
+    %select_vector = select_region(r_um,'box',[0 0 -inf],[max(r_um(:,1))-dist_from_edge max(r_um(:,2))-dist_from_edge inf]);
 
     %undeformed_plane_fit = fit_plane_to_points(r(~select_vector,:));
     undeformed_plane_fit = fit_poly22_to_points(r_um(~select_vector,:)); %works better - takes out any curvature in surface
@@ -250,7 +251,8 @@ for counter = 1:image_count
     [center, rz] = radial_collapse_manual(r_zeroed);
 
     %save the center and rz data for this sphere as text and to stack:
-    center_stack(:,:,counter) = center; rz_stack(:,:,counter) = rz;
+    center_stack(:,:,counter) = center; 
+    rz_stack(:,:,counter) = rz;
     dlmwrite([module_name '_beads_sphere' num2str(counter) '_rz_collapsed.txt'],rz,'\t')
 
     % 2-4) make a nice plot of the collapsed data for this sphere
@@ -260,31 +262,47 @@ for counter = 1:image_count
     %make the plot that looks nice:
     set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
     axis equal
-    xlabel('r (�m) ')
-    ylabel('z (�m) ')
+    xlabel('r (\mu m) ')
+    ylabel('z (\mu m) ')
     savefig([module_name '_beads_sphere' num2str(counter) '_collapsed_figure.fig'])
     
-    % 2-5) Level and collapse background (Nile Red) PDMS 
-    [leveled,zero] = background_level_z(raw, scale, undeformed_plane_fit);
-    bg = background_rz_collapse(leveled, scale, center, zero);
-    bckgd_rz_stack(:,:,counter) = bg; % save the leveled & rz-collapsed bckgd data
+    %% 2-5) Level and collapse background (Nile Red) PDMS 
+    % load in the background dye image
+    try %if range is set to be bigger than the actual stack, will read in files until there are no more z-slices, then continue with locating
+        for i=1:1+range(2)-range(1)
+            I = imread(bckgd_image,'Index',range(1)+i-1);
+            bckgd_raw(:,:,i) = I;
+        end
+    catch %if errors because it's out of images, just continue with what we have
+        disp(['There were ' num2str(i-1) ' images in stack ' bckgd_image])
+    end
+
+    if invert_image
+        bckgd_raw = 255 - bckgd_raw; %invert the 8-bit image; use when the fluorescent dye is in the fluid phase, not in the particles
+    end
+    disp(['Image loading finished at ' datestr(now,'HH:MM:ss') ' on ' datestr(now, 'mm-DD-YYYY') '.'])
+    
+    leveled = background_level_z(bckgd_raw, scale, undeformed_plane_fit);
+    bckgd_rz = background_radial_collapse(leveled, scale, center);
+    bckgd_rz_stack(:,:,counter) = bckgd_rz; % save the leveled & rz-collapsed bckgd data
     
     % create plot for comparison/overlay
     figure('Name', ['Full rz collapse for ' module_name '_sphere' num2str(counter)])
-    plot(bg(:,1),bg(:,2),'.','DisplayName',['profile ' module_name '_beads_sphere' num2str(counter)])
+    plot(bckgd_rz(:,1),bckgd_rz(:,2),'.','DisplayName',['profile ' module_name '_beads_sphere' num2str(counter)])
     hold all
     plot(rz(:,1),rz(:,2),'.','DisplayName',['profile ' module_name '_bckgd_sphere' num2str(counter)])
-    % make the plot that looks nice:
+    %make the plot that looks nice:
     set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
-    % axis equal
+    axis equal
     axis ([0, 60, -15,5])
     xlabel('r (\mu m) ')
     ylabel('z (\mu m) ')
     savefig([module_name '_sphere' num2str(counter) '_overlay_figure.fig'])
 
-    % 2-6) visualize-side view for sanity check
+    %2-6) visualize-side view for sanity check
+    
     disp('Santiy check...')
-    for i=290:1024;
+    for i=290:1024
         imagesc(permute(leveled(i,:,:)>220,[3 2 1])); 
         hold all; 
         plot(rz(:,1)/0.14 + 330, rz(:,2)/0.225 + 61,'r.');
@@ -296,7 +314,7 @@ for counter = 1:image_count
     end
 end
 
-disp(['[Success] complated rz collapsing confocal data.' newline])
+disp([newline '[Success] complated rz collapsing confocal data.' newline])
 
 %% Step 3. Circle fit the collapsed bead coordinates to find sphere Radius and (indentation) depth
 % @dependencies: cicle_fit.m, circle_fit_error.m
@@ -320,8 +338,8 @@ for counter = 1:image_count
     grid on; box on
     set(gca,'LineWidth',1,'FontSize',16,'FontWeight','bold')
 
-    xlabel('Distance from indenter center (µm)','FontSize',18,'FontWeight','bold')
-    ylabel('Surface profile (µm)','FontSize',18,'FontWeight','bold')
+    xlabel('Distance from indenter center (\mu m)','FontSize',18,'FontWeight','bold')
+    ylabel('Surface profile (\mu m)','FontSize',18,'FontWeight','bold')
     xlim([0 40])
     % this asks you to type in a number - what radial distance is definitely
     % just the inner circle?

@@ -5,14 +5,18 @@
 %
 
 function rz = background_rz_collapse(someImage, scale, center, z_zero)
-
+% declare variables and constants
 pixCenter = center./scale(1,2) ;   % convert the center of circle to pixel coordinates
-
 % the maximum radius that we will be looking at
 rMax = floor(max([1024-pixCenter(1), 1024-pixCenter(2), pixCenter(1), pixCenter(2)]));
-rz = zeros(rMax*size(someImage,3),3); % array to return 
+% array to return 
+rz = zeros(rMax*size(someImage,3),3); 
 
+% Based on the Mid-point Circle Drawing Algorithm
+% we use the error/determining parameter as a measure for how much we should 
+% weigh each pixel in terms of calculating the radial average
 % number of samples to take for each radius 
+
 sampleNum = floor(rMax/sqrt(2))+1;
 
 % resulting step size of the "sweeping angle" we will use to add up intensities 
@@ -27,12 +31,6 @@ R = repmat(reshape((1:rMax),[1,1,rMax]),size(D,1),size(D,2));
 % row and columns of sampling positions in  pixel coordinates
 row = floor(pixCenter(1) + R.*cos(D));
 col = floor(pixCenter(2) + R.*sin(D));
-
-% experimental code: try creating concentric circles with radii 1,2,3, ...
-[radius, theta] = meshgrid(1:1:rMax, linspace(0,2*pi,100));
-circlesX = pixCenter(1) + radius.*cos(theta);
-circlesY = pixCenter(2) + radius.*sin(theta);
-
 
 intensity = zeros(size(row,1)*size(row,2),1); %intialize pixel intensities array
 counts = 1;
