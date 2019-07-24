@@ -1,8 +1,8 @@
 TOPDIR := $(shell pwd)
 TXTS := $(shell find $(TOPDIR) -name "*.txt")
 FIGS := $(shell find $(TOPDIR) -name "*.fig")
-MATS := $(shell find $(TOPDIR) -name "*.mat")	
+
 clean :
-	@rm -f $(TXTS) $(FIGS) $(MATS)
+	@rm -f $(TXTS) $(FIGS) 
 	@echo "Removed all .txt .fig .mat files."
 

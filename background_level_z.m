@@ -5,7 +5,7 @@
 % POST: returns z-leveled 3D image
 %
 
-function leveledImage = background_level_z(image, scale, plane_fit)
+function [leveledImage z_zero] = background_level_z(image, scale, plane_fit)
 
 clear leveledImage X Y zShifts;
 
@@ -19,28 +19,30 @@ zDepth = size(image,3); % z-stack depth
 [X,Y] = meshgrid((1:size(image, 1))*scale(1), (1:size(image, 2))*scale(2));
 
 % size of z_shifts for each (x,y) coordinate in pixels
-zShifts = round((plane_fit.p00*ones(size(image,1)) + plane_fit.p10*X + plane_fit.p01*Y...
-     + plane_fit.p11*(X.*Y) + plane_fit.p20*(X.*X) + plane_fit.p02*(Y.*Y))/scale(3));
+zShifts = (plane_fit.p00*ones(size(image,1)) + plane_fit.p10*X + plane_fit.p01*Y...
+     + plane_fit.p11*(X.*Y) + plane_fit.p20*(X.*X) + plane_fit.p02*(Y.*Y)/scale(3));
 
-%z_zero = min(min(zShifts)); % find minimum z shift 
-%zShifts = zShifts - repmat(z_zero,size(image,1),size(image,2),zDepth);
+z_zero = min(min(zShifts)); % find minimum z shift 
+zShifts = zShifts - repmat(z_zero,size(image,1),size(image,2)); % recalculate z-shifts with respect to z_zero
+
 leveledImage = zeros(size(image,1), size(image,2), size(image,3)); % intialize matrix to be returned
 
 % fill up matrix to return with z-shifted values from original 3D image
 for i = 1:size(image,1)
-    yzSlice = squeeze(image(i,:,:));
+    yzSlice = permute(image(i,:,:),[3 2 1]);
     for j = 1:size(image,2)
         % parameters to pass to function 'improfile'
         thisZShift = zShifts(i,j);
-        yEndPoints = [j j];
-        if (thisZShift < 0)
-          zEndPoints = [1 zDepth-thisZShift];
-        else
-          zEndPoints = [1+thisZShift zDepth];
-        end
+        yEndPoints = [j j]+0.00001;
+        zEndPoints = [1+thisZShift zDepth];
+        % if (thisZShift < 0)
+        %   zEndPoints = [1 zDepth-thisZShift];
+        % else
+        %   zEndPoints = [1+thisZShift zDepth];
+        % end
+
         % now call improfile to sample along the z-stack to level the image  
         leveledImage(i,j,:) = reshape(improfile(yzSlice,yEndPoints,zEndPoints,zDepth),1,1,zDepth);
-        %leveledImage(i,j,z_zero - zShifts(i,j) + (1:size(image,3))) = zStack;
     end
-    disp(['Finished levelling for i=' num2str(i)])
+    disp(['finished i = ' num2str(i)])
 end

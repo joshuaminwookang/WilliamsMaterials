@@ -54,8 +54,8 @@ code_folder = pwd;
 cd(image_folder);
 addpath(image_folder);
 
-image_beads_list = strsplit(ls('*_FITC.tif'));
-image_bckgd_list = strsplit(ls('*_Cy5.tif'));
+image_beads_list = strsplit(ls('*_Cy5.tif'));
+image_bckgd_list = strsplit(ls('*_FITC.tif'));
 image_beads_list(end) = []; 
 image_bckgd_list(end) = [];
 image_beads_list = sort(image_beads_list);
@@ -266,7 +266,7 @@ for counter = 1:image_count
     ylabel('z (\mu m) ')
     savefig([module_name '_beads_sphere' num2str(counter) '_collapsed_figure.fig'])
     
-    %% 2-5) Level and collapse background (Nile Red) PDMS 
+    % 2-5) Level and collapse background (Nile Red) PDMS 
     % load in the background dye image
     try %if range is set to be bigger than the actual stack, will read in files until there are no more z-slices, then continue with locating
         for i=1:1+range(2)-range(1)
@@ -282,36 +282,23 @@ for counter = 1:image_count
     end
     disp(['Image loading finished at ' datestr(now,'HH:MM:ss') ' on ' datestr(now, 'mm-DD-YYYY') '.'])
     
-    leveled = background_level_z(bckgd_raw, scale, undeformed_plane_fit);
+    [leveled,z_zero] = background_level_z(bckgd_raw, scale, undeformed_plane_fit);
     bckgd_rz = background_radial_collapse(leveled, scale, center);
     bckgd_rz_stack(:,:,counter) = bckgd_rz; % save the leveled & rz-collapsed bckgd data
     
     % create plot for comparison/overlay
     figure('Name', ['Full rz collapse for ' module_name '_sphere' num2str(counter)])
-    plot(bckgd_rz(:,1),bckgd_rz(:,2),'.','DisplayName',['profile ' module_name '_beads_sphere' num2str(counter)])
+    imagesc([0 size(bckgd_rz,1)*scale(1)],[size(bckgd_rz,2)*scale(3)-z_zero,-z_zero],bckgd_rz')
+    colorbar;
+    axis equal
     hold all
-    plot(rz(:,1),rz(:,2),'.','DisplayName',['profile ' module_name '_bckgd_sphere' num2str(counter)])
+    plot(rz(:,1),-rz(:,2),'.','DisplayName',['profile ' module_name '_bckgd_sphere' num2str(counter)])
     %make the plot that looks nice:
     set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
-    axis equal
-    axis ([0, 60, -15,5])
+    axis ([0, 50, -10,10])
     xlabel('r (\mu m) ')
     ylabel('z (\mu m) ')
-    savefig([module_name '_sphere' num2str(counter) '_overlay_figure.fig'])
-
-    %2-6) visualize-side view for sanity check
-    
-    disp('Santiy check...')
-    for i=290:1024
-        imagesc(permute(leveled(i,:,:)>220,[3 2 1])); 
-        hold all; 
-        plot(rz(:,1)/0.14 + 330, rz(:,2)/0.225 + 61,'r.');
-        hold off; 
-        axis image; 
-        axis xy; 
-        title(i); 
-        input(''); 
-    end
+    %savefig([module_name '_sphere' num2str(counter) '_overlay_figure.fig']
 end
 
 disp([newline '[Success] complated rz collapsing confocal data.' newline])
