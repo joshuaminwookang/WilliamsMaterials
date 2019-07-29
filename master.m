@@ -301,7 +301,7 @@ for counter = 1:image_count
     %savefig([module_name '_sphere' num2str(counter) '_overlay_figure.fig']
 end
 
-disp([newline '[Success] complated rz collapsing confocal data.' newline])
+disp([newline '[Success] compl?ted rz collapsing confocal data.' newline])
 
 %% Step 3. Circle fit the collapsed bead coordinates to find sphere Radius and (indentation) depth
 % @dependencies: cicle_fit.m, circle_fit_error.m
