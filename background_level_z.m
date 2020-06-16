@@ -19,8 +19,8 @@ zDepth = size(image,3); % z-stack depth
 [X,Y] = meshgrid((1:size(image, 1))*scale(1), (1:size(image, 2))*scale(2));
 
 % size of z_shifts for each (x,y) coordinate in pixels
-zShifts = (plane_fit.p00*ones(size(image,1)) + plane_fit.p10*X + plane_fit.p01*Y...
-     + plane_fit.p11*(X.*Y) + plane_fit.p20*(X.*X) + plane_fit.p02*(Y.*Y)/scale(3));
+zShifts = ((plane_fit.p00*ones(size(image,1)) + plane_fit.p10*X + plane_fit.p01*Y...
+     + plane_fit.p11*(X.*Y) + plane_fit.p20*(X.*X) + plane_fit.p02*(Y.*Y))/scale(3));
 
 z_zero = min(min(zShifts)); % find minimum z shift 
 zShifts = zShifts - repmat(z_zero,size(image,1),size(image,2)); % recalculate z-shifts with respect to z_zero

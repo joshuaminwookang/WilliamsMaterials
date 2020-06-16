@@ -23,8 +23,8 @@ function sampledIntensity = background_radial_collapse(image, scale, center)
         zSlice = permute(image(:,:,z),[2 1 3]); % the x-y plane to collpase
         for t = 1:360
             theta = t*pi/180;
-            xEndPoints = rMax*cos(theta)*[0,1]+pixCenter(1);
-            yEndPoints = rMax*sin(theta)*[0,1]+pixCenter(2);
+            xEndPoints = rMax*cos(theta)*[0,1]+pixCenter(2);
+            yEndPoints = rMax*sin(theta)*[0,1]+pixCenter(1);
             temp(t,:) = improfile(zSlice,xEndPoints,yEndPoints,rMax,'bicubic');
         end
         % take the average over all 360 degrees

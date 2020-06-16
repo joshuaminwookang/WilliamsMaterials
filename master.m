@@ -288,17 +288,17 @@ for counter = 1:image_count
     
     % create plot for comparison/overlay
     figure('Name', ['Full rz collapse for ' module_name '_sphere' num2str(counter)])
-    imagesc([0 size(bckgd_rz,1)*scale(1)],[size(bckgd_rz,2)*scale(3)-z_zero,-z_zero],bckgd_rz')
+    imagesc([0 size(bckgd_rz,1)*scale(1)],[z_zero,-size(bckgd_rz,2)+z_zero]*scale(3),bckgd_rz')
     colorbar;
     axis equal
     hold all
     plot(rz(:,1),-rz(:,2),'.','DisplayName',['profile ' module_name '_bckgd_sphere' num2str(counter)])
     %make the plot that looks nice:
     set(gca,'LineWidth',1,'FontSize',20,'FontWeight','bold'); box on; grid on
-    axis ([0, 50, -10,10])
+    axis ([0, 50, -20,20])
     xlabel('r (\mu m) ')
     ylabel('z (\mu m) ')
-    %savefig([module_name '_sphere' num2str(counter) '_overlay_figure.fig']
+    savefig([module_name '_sphere' num2str(counter) '_overlay_figure.fig'])
 end
 
 disp([newline '[Success] compl?ted rz collapsing confocal data.' newline])
